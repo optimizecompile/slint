@@ -16,10 +16,17 @@ pub type UrlVersion = Option<i32>;
 #[cfg(target_arch = "wasm32")]
 use crate::wasm_prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct ElementRcNode {
     pub element: ElementRc,
     pub debug_index: usize,
+}
+
+impl std::fmt::Debug for ElementRcNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let (path, offset) = self.path_and_offset();
+        write!(f, "ElementNode {{ {path:?}:{offset} }}")
+    }
 }
 
 impl ElementRcNode {
@@ -200,7 +207,7 @@ pub struct Diagnostic {
 }
 
 #[allow(unused)]
-#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Eq, Debug, PartialEq, serde::Deserialize, serde::Serialize)]
 pub struct PropertyChange {
     pub name: String,
     pub value: String,
@@ -255,8 +262,12 @@ pub struct ComponentInformation {
     pub is_exported: bool,
     /// This is a layout
     pub is_layout: bool,
+    /// This element fills its parent
+    pub fills_parent: bool,
     /// The URL to the file containing this type
     pub defined_at: Option<Position>,
+    /// Default property values
+    pub default_properties: Vec<PropertyChange>,
 }
 
 impl ComponentInformation {
